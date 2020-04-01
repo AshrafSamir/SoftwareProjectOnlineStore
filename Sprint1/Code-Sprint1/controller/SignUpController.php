@@ -1,6 +1,7 @@
 <?php
 
 include_once realpath(dirname(__FILE__)) . '/user.php';
+include_once realpath(dirname(__FILE__)) . '/../controller/ApiConstructor.php';
 
 class SignUpController{
 

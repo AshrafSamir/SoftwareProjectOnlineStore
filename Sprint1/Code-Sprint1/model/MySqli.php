@@ -2,9 +2,10 @@
 
 include_once 'Connection.php';
 include_once 'SignUpDB.php';
+include_once realpath(dirname(__FILE__)) . '/../controller/DB_Controller.php';
+include_once realpath(dirname(__FILE__)) . '/../controller/ApiConstructor.php';
 
-
-class Mysqli_DB implements Connection, SignUpDB{
+class Mysqli_DB implements Connection, SignUpDB, DBController{
 
 
     private $serverName = "localhost";
@@ -12,10 +13,11 @@ class Mysqli_DB implements Connection, SignUpDB{
     private $password = "";
     private $databaseName = "se_proejct";
     private $Connection;
+    private $api;
 
     function __construct(){
         
-
+        $this->api = new ApiConstructor();
     }
 
     function connect(){
@@ -25,27 +27,28 @@ class Mysqli_DB implements Connection, SignUpDB{
             $this->userName,
             $this->password,
             $this->databaseName
+           
         );
 
 
 
         if ($this->Connection->connect_error){
 
-            die("Connection failed: " . $this->Connection->connect_error);
+            //die("Connection failed: " . $this->Connection->connect_error);
             return 0;
         }
         else{
 
-            echo "Conenction Created Successful";
+            //echo "Conenction Created Successful";
             return $this->Connection;
         }
     }
 
     function disConenct(){
 
-        mysqli_close($this->connection);
+        mysqli_close($this->Connection);
 
-        echo "Connection is Closed";
+        //echo "Connection is Closed";
     }
 
     function checkInDB($username){
@@ -81,18 +84,42 @@ class Mysqli_DB implements Connection, SignUpDB{
         mysqli_query($this->Connection, $query);
 
 
-        array_push($success, array(
+        $this->api->success();
+            
+    }
 
-            "Message" => "User Added Successfully"
-        ));
-    
+
+    function checkAdmin($username){
+
+        
+        $user_check_query = "SELECT role FROM users WHERE username='$username' LIMIT 1";
+        $result = mysqli_query($this->Connection, $user_check_query);
+        $user = mysqli_fetch_assoc($result);
+
+        if ($user) { // if user exists
+           
+            return $user['role'];
+        }
+        else{
+
+            return -1;
+        }
+
+    }
+
+    function getusers(){
+
+        $user_check_query = "SELECT * FROM users ";
+        $result = mysqli_query($this->Connection, $user_check_query);
+        
+
+        $usersList = $this->api->getUsersApi($result);
+
         // set response code - 200 OK
         http_response_code(200);
-        
-        echo "Success";
+    
         // show products data in json format
-        echo json_encode($success);
-            
+        echo json_encode($usersList);
     }
 }
 
