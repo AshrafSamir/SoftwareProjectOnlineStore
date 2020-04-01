@@ -45,7 +45,19 @@ class SignUpController{
         }
         else{
 
-            return 1;
+            if ($this->user->getRole() < 1 && $this->user->getRole() > 3){
+
+
+        
+                echo json_encode(
+                    array("message" => "Role is not valid number.")
+            );
+            }
+            else{
+
+                return 1;
+            }
+            
         }
     }
 }
